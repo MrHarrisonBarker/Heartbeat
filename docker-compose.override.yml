@@ -1,0 +1,19 @@
+version: '3.4'
+
+services:
+  mock-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:5102
+      - ekgHost=heartbeat_heartbeat-ekg_1:5101
+      - serviceHostName=heartbeat_mock-service_1:5102
+      - serviceName=MockService
+    ports:
+      - "5102:5102"
+
+  heartbeat-ekg:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:5101
+    ports:
+      - "5101:5101"

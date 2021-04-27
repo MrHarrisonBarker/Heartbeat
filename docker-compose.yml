@@ -1,0 +1,20 @@
+version: '3.4'
+
+services:
+  
+  mock-service:
+    image: mockservice
+    build:
+      context: .
+      dockerfile: MockService/Dockerfile
+  
+  heartbeat-ekg:
+    image: heartbeatekg
+    build:
+      context: .
+      dockerfile: Heartbeat.EKG/Dockerfile
+
+#networks:
+#  default:
+#    external:
+#      name: imperium
