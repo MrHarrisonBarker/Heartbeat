@@ -1,6 +1,6 @@
 using System;
 
-namespace Heartbeat.EKG
+namespace Heartbeat.EKG.Data
 {
     public class WeatherForecast
     {

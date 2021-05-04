@@ -32,7 +32,7 @@ namespace Heartbeat
         [HttpGet("status")]
         public List<TrackedService> Status()
         {
-            return ServiceTracking.TrackedServices;
+            return ServiceTracking.Services();
         }
     }
 }

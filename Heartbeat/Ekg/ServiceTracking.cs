@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Heartbeat.Hubs;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 
 namespace Heartbeat
@@ -8,16 +10,18 @@ namespace Heartbeat
     public class ServiceTracking
     {
         private readonly ILogger<ServiceTracking> Logger;
-        public List<TrackedService> TrackedServices { get; }
+        private readonly List<TrackedService> TrackedServices = new();
+        private readonly IHubContext<EkgHub> EkgHub;
 
-        public ServiceTracking(ILogger<ServiceTracking> logger)
+        public ServiceTracking(ILogger<ServiceTracking> logger, IHubContext<EkgHub> ekgHub)
         {
             Logger = logger;
-            TrackedServices = new List<TrackedService>();
+            EkgHub = ekgHub;
         }
 
         public void Add(string containerId, string hostname, int? hostPort, ServiceStatus status, string name)
         {
+            Logger.LogInformation($"total tracked services -> {TrackedServices.Count}");
             var service = TrackedServices.Find(x => x.Id == containerId);
 
             if (service != null)
@@ -44,6 +48,16 @@ namespace Heartbeat
             };
 
             TrackedServices.Add(trackedService);
+        }
+
+        public List<TrackedService> Services()
+        {
+            return TrackedServices;
+        }
+
+        public TrackedService Service(string id)
+        {
+            return TrackedServices.Find(x => x.Id == id);
         }
     }
 }

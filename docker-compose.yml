@@ -7,6 +7,12 @@ services:
     build:
       context: .
       dockerfile: MockService/Dockerfile
+
+  another-mock-service:
+    image: anothermockservice
+    build:
+      context: .
+      dockerfile: AnotherMockService/Dockerfile
   
   heartbeat-ekg:
     image: heartbeatekg

@@ -1,0 +1,64 @@
+﻿@page "/services"
+@using Microsoft.Extensions.Logging
+
+@inject MockService MockService;
+@inject ServiceTracking ServiceTracking;
+@inject ILogger<Service> Logger;
+@inject NavigationManager NavigationManager;
+
+<h1>Services</h1>
+
+@if (TrackedServices == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Service name</th>
+            <th>Hostname</th>
+            <th>Port</th>
+            <th>Discovered</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var service in TrackedServices)
+        {
+            <tr>
+                <td class="link" @onclick="() => NavigateToService(service.Id)">@service.Id</td>
+                <td>@service.ServiceName</td>
+                <td>@service.Hostname</td>
+                <td>@service.Port</td>
+                <td>@service.Discovered.ToLongTimeString() - @service.Discovered.ToShortDateString()</td>
+                <td>@service.Status</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private List<TrackedService> TrackedServices;
+
+    protected override void OnInitialized()
+    {
+        Logger.LogInformation("Getting tracked services");
+
+        TrackedServices = ServiceTracking.Services();
+
+        Logger.LogInformation($"Got tracked services: {TrackedServices.Count}");
+    }
+
+    private void NavigateToService(string id)
+    {
+        NavigationManager.NavigateTo($"/service/{id}");
+    }
+
+}

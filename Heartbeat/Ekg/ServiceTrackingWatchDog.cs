@@ -1,6 +1,9 @@
+#nullable enable
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Heartbeat.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -10,13 +13,15 @@ namespace Heartbeat
     {
         private readonly ILogger<ServiceTrackingWatchDog> Logger;
         private readonly ServiceTracking ServiceTracking;
+        private readonly IHubContext<EkgHub> EkgHub;
 
-        private Timer Timer;
+        private Timer? Timer;
         private readonly TimeSpan CheckInterval = TimeSpan.FromSeconds(10);
 
-        public ServiceTrackingWatchDog(ILogger<ServiceTrackingWatchDog> logger, ServiceTracking serviceTracking)
+        public ServiceTrackingWatchDog(ILogger<ServiceTrackingWatchDog> logger, ServiceTracking serviceTracking, IHubContext<EkgHub> ekgHub)
         {
             ServiceTracking = serviceTracking;
+            EkgHub = ekgHub;
             Logger = logger;
         }
 
@@ -24,7 +29,11 @@ namespace Heartbeat
         {
             Logger.LogInformation("Checking tracked services");
 
-            ServiceTracking.TrackedServices.ForEach(async service => { await service.CheckHealth(); });
+            ServiceTracking.Services().ForEach(async service =>
+            {
+                await service.CheckHealth();
+                await EkgHub.Clients.All.SendAsync("pulse", service);
+            });
 
             return Task.CompletedTask;
         }

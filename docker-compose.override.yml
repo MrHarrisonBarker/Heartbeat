@@ -10,6 +10,16 @@ services:
       - serviceName=MockService
     ports:
       - "5102:5102"
+      
+  another-mock-service:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:5103
+      - ekgHost=heartbeat_heartbeat-ekg_1:5101
+      - serviceHostName=heartbeat_antoher-mock-service_1:5103
+      - serviceName=AntoherMockService
+    ports:
+      - "5103:5103"
 
   heartbeat-ekg:
     environment:

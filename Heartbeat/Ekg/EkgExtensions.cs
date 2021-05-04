@@ -12,8 +12,6 @@ namespace Heartbeat
     {
         public EkgBuilder(IServiceCollection services)
         {
-            services.AddSingleton<ServiceTracking>();
-            services.AddHostedService<ServiceTrackingWatchDog>();
             services.AddMvcCore().AddControllersAsServices();
         }
     }

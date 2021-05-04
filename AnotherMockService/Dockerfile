@@ -19,7 +19,7 @@ COPY "NuGet.config" "NuGet.config"
 RUN dotnet restore "Heartbeat.sln"
 
 COPY . .
-WORKDIR /src/MockService
+WORKDIR /src/AnotherMockService
 RUN dotnet publish -c Release -o /app
 
 FROM build AS publish
@@ -27,4 +27,4 @@ FROM build AS publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
-ENTRYPOINT ["dotnet", "MockService.dll"]
+ENTRYPOINT ["dotnet", "AnotherMockService.dll"]

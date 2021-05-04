@@ -1,0 +1,124 @@
+﻿@page "/service/{id}"
+@using System.Globalization
+@using Heartbeat.Hubs
+@using Microsoft.AspNetCore.SignalR.Client;
+@using Microsoft.Extensions.Logging
+
+@inject MockService MockService;
+@inject ServiceTracking ServiceTracking;
+@inject NavigationManager NavigationManager;
+@inject ILogger<Service> Logger;
+
+<h1>@Id</h1>
+
+@if (!NotFound)
+{
+    @if (TrackedService == null)
+    {
+        <p>
+            <em>Loading...</em>
+        </p>
+    }
+    else
+    {
+        <div class="d-flex flex-row justify-content-between">
+            <h3>@TrackedService.ServiceName</h3>
+            <div>
+                <h1>
+                    <span class="badge bg-secondary text-white">@TrackedService.Status</span>
+                </h1>
+            </div>
+        </div>
+
+        @if (TrackedService.Status == ServiceStatus.NotFound)
+        {
+            <div class="alert alert-danger" role="alert">
+                Service cannot be found!
+            </div>
+        }
+
+        <div>
+            <h4>@TrackedService.Hostname : @TrackedService.Port</h4>
+
+            <div><strong>Discovered: </strong>@TrackedService.Discovered.ToLongTimeString() - @TrackedService.Discovered.ToLongDateString()</div>
+            <div>
+                <strong>Last health check: </strong>@TrackedService.LastHealthCheck.ToString(CultureInfo.CurrentCulture)
+            </div>
+            <div>
+                <em>
+                    <strong>Last check attempt: </strong>@TrackedService.LastCheckAttempt.ToString(CultureInfo.CurrentCulture)
+                </em>
+            </div>
+            <div>
+                <strong>Last heartbeat: </strong>@TrackedService.LastHeartBeat.ToString(CultureInfo.CurrentCulture)
+            </div>
+        </div>
+
+        <div>
+            <button class="btn btn-primary" @onclick="ForceCheck">Force Health Check</button>
+        </div>
+    }
+}
+else
+{
+    <p>
+        NotFound
+    </p>
+}
+
+@code {
+
+    [Parameter]
+    public string Id { get; set; }
+
+    private HubConnection HubConnection;
+    private bool ConnectionErr;
+
+    private bool NotFound;
+    private TrackedService TrackedService;
+
+    protected override async Task OnInitializedAsync()
+    {
+        TrackedService = ServiceTracking.Service(Id);
+
+        if (TrackedService == null) NotFound = true;
+        else await ConnectPulse();
+    }
+
+    private async Task ConnectPulse()
+    {
+        try
+        {
+            Logger.LogInformation("Starting ekg hub connection");
+
+            string baseUrl = NavigationManager.BaseUri;
+            var hubUrl = baseUrl.TrimEnd('/') + EkgHub.HubUrl;
+
+            HubConnection = new HubConnectionBuilder().WithUrl(hubUrl).Build();
+
+            HubConnection.On<TrackedService>("pulse", ReceivePulse);
+
+            await HubConnection.StartAsync();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            ConnectionErr = true;
+        }
+    }
+
+    private void ReceivePulse(TrackedService updatedService)
+    {
+        Logger.LogInformation($"got updated service data for {updatedService.Hostname}:{updatedService.Port}");
+
+        if (TrackedService.Id == updatedService.Id) TrackedService = updatedService;
+        
+        StateHasChanged();
+    }
+
+    private async void ForceCheck()
+    {
+        await TrackedService.CheckHealth();
+    }
+
+}

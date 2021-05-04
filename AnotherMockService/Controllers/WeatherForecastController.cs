@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace Heartbeat.EKG.Controllers
+namespace AnotherMockService.Controllers
 {
     [ApiController]
     [Route("[controller]")]

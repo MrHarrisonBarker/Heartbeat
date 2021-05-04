@@ -1,4 +1,3 @@
-using Heartbeat.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -6,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 
-namespace MockService
+namespace Heartbeat.EKG
 {
     public class Startup
     {
@@ -20,9 +19,9 @@ namespace MockService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHeartbeat(Configuration["ekgHost"], Configuration["serviceHostName"], Configuration["serviceName"]);
             services.AddControllers();
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "MockService", Version = "v1"}); });
+            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "Heartbeat.EKG", Version = "v1"}); });
+            services.AddEkg();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -30,9 +29,9 @@ namespace MockService
         {
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                // app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "MockService v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Heartbeat.EKG v1"));
             }
 
             // app.UseHttpsRedirection();
@@ -41,15 +40,7 @@ namespace MockService
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-            
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapHealthChecks("/hc");
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }
